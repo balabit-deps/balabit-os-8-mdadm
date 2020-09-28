@@ -1,0 +1,32 @@
+Description: mdcheck: when mdcheck_start is enabled, enable mdcheck_continue too.
+ mdcheck_continue continues a regular array scan that was started by
+ mdcheck_start.
+ mdcheck_start will ensure that mdcheck_continue is active.
+ Howver if you reboot after a check has started, but before it finishes,
+ then mdcheck_continue won't cause it to continue, because nothing
+ starts it on boot.
+
+ So add an install option for mdcheck_contine, and make sure it
+ gets enabled when mdcheck_start is enabled.
+
+Author: NeilBrown <neilb@suse.de>
+Origin: backport, https://git.kernel.org/pub/scm/utils/mdadm/mdadm.git/commit/?id=6636788aaf4ec0cacaefb6e77592e4a68e70a957
+Bug-Ubuntu: https://launchpad.net/bugs/1852747
+--- a/systemd/mdcheck_continue.timer
++++ b/systemd/mdcheck_continue.timer
+@@ -12,3 +12,6 @@
+ OnCalendar=daily
+ RandomizedDelaySec=12h
+ Persistent=true
++
++[Install]
++WantedBy=mdmonitor.service
+--- a/systemd/mdcheck_start.timer
++++ b/systemd/mdcheck_start.timer
+@@ -14,4 +14,5 @@
+ Persistent=true
+ 
+ [Install]
+-WantedBy= mdmonitor.service
++WantedBy=mdmonitor.service
++Also=mdcheck_continue.timer
